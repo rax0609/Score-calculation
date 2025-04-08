@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>總成績計算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #333;
+            --primary-hover: #000;
+            --text-color: #ffffff;
+            --text-light: #fff;
+            --bg-dark: #222;
+            --bg-light: #fff;
+            --success-color: #2ecc71;
+            --fail-color: #e74c3c;
+            --card-bg: rgba(255, 255, 255, 0.25);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #000;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transform: translateY(0);
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        
+        input, select {
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            width: 100%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+            z-index: -1;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        .score-input {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .score-input:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group > div {
+            flex: 1;
+        }
+        
+        /* 彈出視窗樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+        
+        .score-result {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 20px 0;
+            color: #333;
+        }
+        
+        .pass-fail-result {
+            font-size: 24px;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0 20px;
+        }
+        
+        .pass {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+        
+        .fail {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--fail-color);
+        }
+        
+        .modal-close {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #000;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .score-result {
+                font-size: 28px;
+            }
+            
+            .pass-fail-result {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="animate__animated animate__fadeInDown">總成績計算器</h1>
+    
+    <div class="section-title animate__animated animate__fadeIn animate__delay-1s">段考成績</div>
+    <label for="examCount">段考次數：</label>
+    <select id="examCount" onchange="generateExamInputs()">
+        <option value="0">請選擇</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+
+    <div id="examInputs"></div>
+    
+    <div class="section-title animate__animated animate__fadeIn animate__delay-1s">平時成績</div>
+    <label for="regularCount">平時成績項目數：</label>
+    <select id="regularCount" onchange="generateRegularInputs()">
+        <option value="0">請選擇</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+
+    <div id="regularInputs"></div>
+
+    <button onclick="calculateTotalScore()" class="animate__animated animate__fadeIn animate__delay-2s">計算總成績</button>
+</div>
+
+<!-- 彈出視窗 -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal-content animate__animated animate__zoomIn">
+        <h2>計算結果</h2>
+        <div class="score-result" id="scoreResult"></div>
+        <div class="pass-fail-result" id="passFailResult"></div>
+        <button class="modal-close" onclick="closeModal()">關閉</button>
+    </div>
+</div>
+
+<script>
+    function generateExamInputs() {
+        const count = document.getElementById('examCount').value;
+        const container = document.getElementById('examInputs');
+        container.innerHTML = '';
+
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'score-input';
+            div.style.animationDelay = `${i * 0.1}s`;
+            
+            div.innerHTML = `
+                <div class="input-group">
+                    <div>
+                        <label for="examScore${i}">考試 ${i + 1} 分數：</label>
+                        <input type="number" id="examScore${i}" placeholder="請輸入分數" min="0" max="100">
+                    </div>
+                    <div>
+                        <label for="examWeight${i}">考試 ${i + 1} 佔比（%）：</label>
+                        <input type="number" id="examWeight${i}" placeholder="請輸入佔比" min="0" max="100">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function generateRegularInputs() {
+        const count = document.getElementById('regularCount').value;
+        const container = document.getElementById('regularInputs');
+        container.innerHTML = '';
+
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'score-input';
+            div.style.animationDelay = `${i * 0.1}s`;
+            
+            div.innerHTML = `
+                <div class="input-group">
+                    <div>
+                        <label for="regularScore${i}">平時項目 ${i + 1} 分數：</label>
+                        <input type="number" id="regularScore${i}" placeholder="請輸入分數" min="0" max="100">
+                    </div>
+                    <div>
+                        <label for="regularWeight${i}">平時項目 ${i + 1} 佔比（%）：</label>
+                        <input type="number" id="regularWeight${i}" placeholder="請輸入佔比" min="0" max="100">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function calculateTotalScore() {
+        const examCount = parseInt(document.getElementById('examCount').value);
+        const regularCount = parseInt(document.getElementById('regularCount').value);
+        
+        let totalExamScore = 0;
+        let totalExamWeight = 0;
+        
+        for (let i = 0; i < examCount; i++) {
+            const score = parseFloat(document.getElementById(`examScore${i}`).value) || 0;
+            const weight = parseFloat(document.getElementById(`examWeight${i}`).value) / 100 || 0;
+            totalExamScore += score * weight;
+            totalExamWeight += weight;
+        }
+
+        let totalRegularScore = 0;
+        let totalRegularWeight = 0;
+
+        for (let i = 0; i < regularCount; i++) {
+            const score = parseFloat(document.getElementById(`regularScore${i}`).value) || 0;
+            const weight = parseFloat(document.getElementById(`regularWeight${i}`).value) / 100 || 0;
+            totalRegularScore += score * weight;
+            totalRegularWeight += weight;
+        }
+
+        const scoreResultElement = document.getElementById('scoreResult');
+        const passFailResultElement = document.getElementById('passFailResult');
+        
+        if (totalExamWeight + totalRegularWeight !== 1) {
+            scoreResultElement.innerText = "錯誤";
+            passFailResultElement.innerText = "所有佔比必須加起來等於 100%";
+            passFailResultElement.className = 'pass-fail-result';
+            showModal();
+            return;
+        }
+
+        const totalScore = totalExamScore + totalRegularScore;
+        const isPassed = totalScore >= 60;
+        
+        scoreResultElement.innerText = `總成績：${totalScore.toFixed(2)}`;
+        passFailResultElement.innerText = isPassed ? "通過！" : "失敗！";
+        passFailResultElement.className = `pass-fail-result ${isPassed ? 'pass' : 'fail'}`;
+        
+        showModal();
+    }
+    
+    function showModal() {
+        const modal = document.getElementById('resultModal');
+        modal.classList.add('show');
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('resultModal');
+        modal.classList.remove('show');
+    }
+</script>
+
+</body>
+</html>
