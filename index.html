@@ -435,7 +435,7 @@
         const isPassed = totalScore >= 60;
         
         scoreResultElement.innerText = `總成績：${totalScore.toFixed(2)}`;
-        passFailResultElement.innerText = isPassed ? "通過！" : "失敗！";
+        passFailResultElement.innerText = isPassed ? "通過！" : "未通過！";
         passFailResultElement.className = `pass-fail-result ${isPassed ? 'pass' : 'fail'}`;
         
         showModal();
